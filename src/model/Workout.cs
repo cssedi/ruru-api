@@ -1,0 +1,14 @@
+using System;
+
+namespace ruru_api.src.model;
+
+public class Workout
+{
+    public Guid Id { get;set; }
+    public string Name { get;set; }
+    public DateTime Date { get;set; }
+    public Guid UserId {get; set;} //User FK
+    public User User {get; set;} = null!;
+
+
+}
