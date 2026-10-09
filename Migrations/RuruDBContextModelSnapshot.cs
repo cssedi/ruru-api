@@ -10,7 +10,7 @@ using ruru_api.src.model;
 
 namespace ruru_api.Migrations
 {
-    [DbContext(typeof(RuruDBContext))]
+    [DbContext(typeof(RuruDbContext))]
     partial class RuruDBContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -21,6 +21,29 @@ namespace ruru_api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ruru_api.src.model.Exercise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Asset")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<string[]>("PrimaryMuscleGroup")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.PrimitiveCollection<string[]>("SecondaryMuscleGroup")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Exercise");
+                });
 
             modelBuilder.Entity("ruru_api.src.model.User", b =>
                 {
@@ -86,20 +109,73 @@ namespace ruru_api.Migrations
                     b.ToTable("Workout");
                 });
 
+            modelBuilder.Entity("ruru_api.src.model.WorkoutExercise", b =>
+                {
+                    b.Property<Guid>("ExerciseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WorkoutId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("MaxReps")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinReps")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ExerciseId", "WorkoutId");
+
+                    b.HasIndex("WorkoutId");
+
+                    b.ToTable("WorkoutExercise");
+                });
+
             modelBuilder.Entity("ruru_api.src.model.Workout", b =>
                 {
                     b.HasOne("ruru_api.src.model.User", "User")
                         .WithMany("Workouts")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ruru_api.src.model.WorkoutExercise", b =>
+                {
+                    b.HasOne("ruru_api.src.model.Exercise", "Exercise")
+                        .WithMany("WorkoutExercise")
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ruru_api.src.model.Workout", "Workout")
+                        .WithMany("WorkoutExercises")
+                        .HasForeignKey("WorkoutId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+
+                    b.Navigation("Workout");
+                });
+
+            modelBuilder.Entity("ruru_api.src.model.Exercise", b =>
+                {
+                    b.Navigation("WorkoutExercise");
+                });
+
             modelBuilder.Entity("ruru_api.src.model.User", b =>
                 {
                     b.Navigation("Workouts");
+                });
+
+            modelBuilder.Entity("ruru_api.src.model.Workout", b =>
+                {
+                    b.Navigation("WorkoutExercises");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,6 +9,7 @@ public class Workout
     public DateTime Date { get;set; }
     public Guid UserId {get; set;} //User FK
     public User User {get; set;} = null!;
-
+    
+    public ICollection<WorkoutExercise> WorkoutExercises {get; init; } = new List<WorkoutExercise>();
 
 }

@@ -7,9 +7,9 @@ namespace ruru_api.src.repositories;
 
 public class WorkoutRepository : IWorkoutRepository
 {
-    private readonly RuruDBContext _context;
+    private readonly RuruDbContext _context;
 
-    public WorkoutRepository(RuruDBContext context)
+    public WorkoutRepository(RuruDbContext context)
     {
         _context = context;
     }

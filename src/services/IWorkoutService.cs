@@ -1,6 +1,6 @@
 using System;
 using ruru_api.src.DTOs.Workouts;
-
+ 
 namespace ruru_api.src.services;
 
 public interface IWorkoutService

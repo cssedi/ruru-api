@@ -11,7 +11,7 @@ using ruru_api.src.model;
 
 namespace ruru_api.Migrations
 {
-    [DbContext(typeof(RuruDBContext))]
+    [DbContext(typeof(RuruDbContext))]
     [Migration("20261004121440_updatedClasses")]
     partial class updatedClasses
     {
