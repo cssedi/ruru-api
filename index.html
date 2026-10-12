@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F1F2F7" />
+    <meta name="description" content="ruru: log your workouts and your meals on one screen." />
+    <title>ruru | Train and eat on one screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Hanken+Grotesk:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Set the theme before first paint to avoid a flash.
+      ;(function () {
+        var t
+        try { t = localStorage.getItem('ruru-theme') } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = t
+        document.documentElement.style.colorScheme = t
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
