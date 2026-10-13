@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ruru_api.services.WorkoutService;
 using ruru_api.src.DTOs.Workouts;
-using ruru_api.src.services;
 
 namespace ruru_api.src.controller
 {

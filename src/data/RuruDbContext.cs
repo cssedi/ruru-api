@@ -1,16 +1,19 @@
+using System.Reflection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ruru_api.src.controller;
 
 namespace ruru_api.src.model
 {
-    public class RuruDbContext : DbContext {
+    public class RuruDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid> {
         public RuruDbContext(DbContextOptions<RuruDbContext> options): base(options)
         {
         }
         public DbSet<User> Users {get; set;}
         public DbSet<Workout> Workout {get;set;}
         public DbSet<Exercise> Exercise {get;set;}
-        public DbSet<WorkoutExercise> WorkoutExercise {get;set;}
+        public DbSet<WorkoutExercise> WorkoutExercise { get; set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,15 +40,14 @@ namespace ruru_api.src.model
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
-            modelBuilder.Entity<User>().HasData(new User
+            modelBuilder.Entity<User>(entity =>
             {
-                Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                Name = "Test",
-                Surname = "User",
-                Age = 30,
-                Weight = 75f,
-                Height = 180f
+                entity.ToTable("User");
+                entity.HasKey(u => u.Id);
             });
+            
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
