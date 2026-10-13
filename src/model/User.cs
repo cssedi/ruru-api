@@ -1,14 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace ruru_api.src.model;
 
-public class User
+public class User : IdentityUser<Guid>
 {
-    [Key]
-    public Guid Id {get; init;}
     [Required]
     [StringLength(25)]
+    public string Email { get; set; }
     public string Name {get; init;}
     [Required]
     [StringLength(25)]
