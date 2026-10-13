@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using ruru_api.src.DTOs.Workouts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using ruru_api.services.WorkoutService;
 using ruru_api.src.model;
 using ruru_api.src.repositories;
-using ruru_api.src.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,15 +13,57 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+
 builder.Services.AddDbContext<RuruDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer("WebUI", options =>
+    {
+        options.MetadataAddress = builder.Configuration["Api:MetadataAddress"]!;
+        options.Authority = builder.Configuration["Api:Authority"];
+        options.Audience = builder.Configuration["Api:Audience"];
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidAudience = builder.Configuration["Api:Audience"],
+            ValidIssuer = builder.Configuration["Api:Issuer"],
+            ValidAudiences = builder.Configuration.GetSection("Api:ValidAudiences").Get<string[]>(),
+            ValidIssuers = builder.Configuration.GetSection("Api:ValidAudiences").Get<string[]>(),
+        };
+        
+        options.MapInboundClaims = false;
+    });
+
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    
+    options.User.RequireUniqueEmail = true;
+}).AddEntityFrameworkStores<RuruDbContext>()
+.AddDefaultTokenProviders();
+
+
+builder.Services.AddIdentityApiEndpoints<User>()
+    .AddRoles<IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<RuruDbContext>();
+
+
 builder.Services.AddCors(option =>
 {
-    option.AddPolicy("OpenPolicy", builder =>
+    option.AddPolicy("OpenPolicy", policy =>
     {
-        builder.AllowAnyOrigin()
+        policy.AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyHeader();
     });
@@ -46,5 +90,7 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.UseCors();
+
+app.MapIdentityApi<User>();
 
 app.Run();
