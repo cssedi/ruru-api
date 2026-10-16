@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using ruru_api.services.AuthService;
 using ruru_api.services.WorkoutService;
 using ruru_api.src.model;
 using ruru_api.src.repositories;
+using ruru_api.src.repositories.AuthRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +41,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.MapInboundClaims = false;
     });
 
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
     
@@ -50,13 +52,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireLowercase = false;
     
     options.User.RequireUniqueEmail = true;
-}).AddEntityFrameworkStores<RuruDbContext>()
-.AddDefaultTokenProviders();
-
-
-builder.Services.AddIdentityApiEndpoints<User>()
-    .AddRoles<IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<RuruDbContext>();
+}).AddRoles<IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<RuruDbContext>()
+    .AddDefaultTokenProviders();
 
 
 builder.Services.AddCors(option =>
@@ -71,6 +69,9 @@ builder.Services.AddCors(option =>
 
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 var app = builder.Build();
 
@@ -90,7 +91,5 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.UseCors();
-
-app.MapIdentityApi<User>();
 
 app.Run();

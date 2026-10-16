@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using ruru_api.DTOs.Auth;
 
 namespace ruru_api.src.model;
 
@@ -8,7 +9,7 @@ public class User : IdentityUser<Guid>
 {
     [Required]
     [StringLength(25)]
-    public string Email { get; set; }
+    public string EmailAddress { get; set; }
     public string Name {get; init;}
     [Required]
     [StringLength(25)]
