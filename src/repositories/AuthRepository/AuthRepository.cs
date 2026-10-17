@@ -23,6 +23,14 @@ public class AuthRepository : IAuthRepository
 
     public async Task<Result<User>> CreateUser(RegisterUserRequestBody requestBody)
     {
+        var roleName = nameof(UserRole.User);
+
+        // Check before creating the user: AddToRoleAsync throws (rather than failing) if the role is missing
+        if (!await _roleManager.RoleExistsAsync(roleName))
+        {
+            return Result<User>.Failure($"Role '{roleName}' does not exist.");
+        }
+
         var user = new User
         {
             UserName = requestBody.Email, // Identity requires a UserName
@@ -38,7 +46,7 @@ public class AuthRepository : IAuthRepository
             return Result<User>.Failure(createResult.Errors.Select(e => e.Description));
         }
 
-        var roleResult = await _userManager.AddToRoleAsync(user, nameof(UserRole.User));
+        var roleResult = await _userManager.AddToRoleAsync(user, roleName);
         if (!roleResult.Succeeded)
         {
             // Don't leave a user in the database without a role

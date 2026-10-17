@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using ruru_api.DTOs.Auth;
 using ruru_api.services.AuthService;
 using ruru_api.services.WorkoutService;
 using ruru_api.src.model;
@@ -74,6 +75,19 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();
+
+// Make sure every role in the UserRole enum exists in the database (safe to run on every startup)
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    foreach (var roleName in Enum.GetNames<UserRole>())
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+        }
+    }
+}
 
 
 // Configure the HTTP request pipeline.

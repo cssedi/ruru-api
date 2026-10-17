@@ -45,6 +45,28 @@ namespace ruru_api.src.model
                 entity.ToTable("User");
                 entity.HasKey(u => u.Id);
             });
+
+            modelBuilder.Entity<IdentityRole<Guid>>(entity =>
+            {
+                entity.ToTable("Role");
+                entity.HasKey(r => r.Id);
+                entity.HasData(
+                    new IdentityRole<Guid>
+                    {
+                        Id = new Guid("38721ab2-ba90-4bba-aee3-53d9f87a7fa2"),
+                        Name = "User",
+                        NormalizedName = "USER",
+                        ConcurrencyStamp = "a4828fab-220d-45ec-9310-4e214f8576e8"
+                    },
+                    new IdentityRole<Guid>
+                    {
+                        Id = new Guid("22a3a872-cfa3-4d31-84f1-ae5b2728a582"),
+                        Name = "Admin",
+                        NormalizedName = "ADMIN",
+                        ConcurrencyStamp = "85b3fc77-c704-4905-9ebf-12b3d2f1c537"
+                    }
+                );
+            });
             
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

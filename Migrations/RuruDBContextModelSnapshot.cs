@@ -47,6 +47,22 @@ namespace ruru_api.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("38721ab2-ba90-4bba-aee3-53d9f87a7fa2"),
+                            ConcurrencyStamp = "a4828fab-220d-45ec-9310-4e214f8576e8",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        },
+                        new
+                        {
+                            Id = new Guid("22a3a872-cfa3-4d31-84f1-ae5b2728a582"),
+                            ConcurrencyStamp = "85b3fc77-c704-4905-9ebf-12b3d2f1c537",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -196,19 +212,24 @@ namespace ruru_api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
+
                     b.Property<float>("Height")
                         .HasColumnType("real");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -229,11 +250,6 @@ namespace ruru_api.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
