@@ -24,13 +24,24 @@ namespace ruru_api.src.controller
          [HttpPost("register")]
          public async Task<IActionResult> Register(RegisterUserRequestBody dto)
          {
-             var response = await _authService.CreateUserAsync(dto);
+             var result = await _authService.CreateUserAsync(dto);
 
+             if (!result.Succeeded)
+             {
+                 return BadRequest(new { errors = result.Errors });
+             }
+
+             return Ok(result.Value);
+         }
+
+         [HttpPost("login")]
+         public async Task<IActionResult> SignIn(SignInRequestBody dto)
+         {
+             var response = await _authService.SignInAsync(dto);
              if (response.Token == null)
              {
                  return BadRequest(new { response.Message });
              }
-                
              return Ok(new {response});
          }
      }

@@ -9,14 +9,13 @@ public class User : IdentityUser<Guid>
 {
     [Required]
     [StringLength(25)]
-    public string EmailAddress { get; set; }
-    public string Name {get; init;}
+    public string FirstName {get; init;}
     [Required]
     [StringLength(25)]
-    public string Surname {get; init;}
+    public string LastName {get; init;}
     public int Age {get; init;}
     public float Weight {get;init;}
-    public float Height {get; init;}
+    public float Height { get; init; }
     public ICollection<Workout> Workouts {get; init;} = new List<Workout>();
 
 }

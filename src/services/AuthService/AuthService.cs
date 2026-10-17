@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using ruru_api.DTOs.Auth;
+using ruru_api.src.common;
 using ruru_api.src.model;
 using ruru_api.src.repositories.AuthRepository;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,23 +27,53 @@ public class AuthService : IAuthService
         _roleManager = roleManager;
     }
 
-    public async Task<RegisterUserResponseBody> CreateUserAsync(RegisterUserRequestBody requestBody)
+    public async Task<Result<UserSignInResponseBody>> CreateUserAsync(RegisterUserRequestBody requestBody)
     {
-        var response = await _authRepository.CreateUser(requestBody);
-
-        if (response != null)
+        if (requestBody.Password != requestBody.ConfirmPassword)
         {
-            return new RegisterUserResponseBody()
+            return Result<UserSignInResponseBody>.Failure("Passwords do not match.");
+        }
+
+        var result = await _authRepository.CreateUser(requestBody);
+        if (!result.Succeeded)
+        {
+            return Result<UserSignInResponseBody>.Failure(result.Errors);
+        }
+
+        return Result<UserSignInResponseBody>.Success(new UserSignInResponseBody
+        {
+            Message = "Registration Successful!",
+            Token = await GenerateJwtToken(result.Value!)
+        });
+    }
+
+    public async Task<UserSignInResponseBody> SignInAsync(SignInRequestBody requestBody)
+    {
+        var user = await _authRepository.GetUser(requestBody.Email);
+        
+        if (user == null)
+        {
+            return new UserSignInResponseBody()
             {
-                Message = "Registration Successful!",
-                Token = await GenerateJwtToken(response)
+                Message = "This Email address is not in our system, Would you like to create a new account?"
             };
         }
-        return new RegisterUserResponseBody()
+        
+        var response = await _signInManager.PasswordSignInAsync(requestBody.Email, requestBody.Password, false, false);
+
+        if (!response.Succeeded)
         {
-            Message = "User creation failed. Check logs for details",
-            Token = null
+            return new UserSignInResponseBody()
+            {
+                Message = "This email is not registered on the system. Would you like to create a new account?",
+            };
+        }
+        return new UserSignInResponseBody()
+        {
+            Message = "User successfully signed in",
+            Token = await GenerateJwtToken(user)
         };
+        
     }
     
     
@@ -60,7 +91,7 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // unique token ID
             new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new Claim("FullName", (user.Name + user.Surname) ?? string.Empty)
+            new Claim("FullName", (user.FirstName + user.LastName) ?? string.Empty)
         };
         // Add all user roles as claims
         var roles = await _userManager.GetRolesAsync(user);

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using ruru_api.DTOs.Auth;
 using ruru_api.services.AuthService;
+using ruru_api.src.common;
 using ruru_api.src.model;
 
 namespace ruru_api.src.repositories.AuthRepository;
@@ -20,53 +21,61 @@ public class AuthRepository : IAuthRepository
         _roleManager = roleManager;
     }
 
-    public async Task<User?> CreateUser(RegisterUserRequestBody requestBody)
+    public async Task<Result<User>> CreateUser(RegisterUserRequestBody requestBody)
     {
-        User user = new User()
+        var user = new User
         {
-            Name = requestBody.FirstName,
-            Surname = requestBody.LastName,
-            EmailAddress = requestBody.Email,
+            UserName = requestBody.Email, // Identity requires a UserName
+            Email = requestBody.Email,
+            FirstName = requestBody.FirstName,
+            LastName = requestBody.LastName,
         };
 
-        string userRole = nameof(User);
-
-        try
+        // Fails with the password / unique-email rules configured in Program.cs
+        var createResult = await _userManager.CreateAsync(user, requestBody.Password);
+        if (!createResult.Succeeded)
         {
-            var userResult = await _userManager.CreateAsync(user, requestBody.Password);
-            var roleResult = await _userManager.AddToRoleAsync(user, userRole);
-            if (userResult.Succeeded && roleResult.Succeeded)
-            {
-                // sign in user after registration
-                await _signInManager.SignInAsync(user, false);
-                return user;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        catch (Exception e)
-        {
-            
+            return Result<User>.Failure(createResult.Errors.Select(e => e.Description));
         }
 
-        return user;
+        var roleResult = await _userManager.AddToRoleAsync(user, nameof(UserRole.User));
+        if (!roleResult.Succeeded)
+        {
+            // Don't leave a user in the database without a role
+            await _userManager.DeleteAsync(user);
+            return Result<User>.Failure(roleResult.Errors.Select(e => e.Description));
+        }
+
+        return Result<User>.Success(user);
     }
 
-    public async Task<User> SignIn(SignInRequestBody requestBody)
+    public async Task<User?> SignIn(SignInRequestBody requestBody)
     {
         var user = await _userManager.FindByEmailAsync(requestBody.Email);
         
-        if (user != null)
+        if (user  == null)
         {
-            var result = await _signInManager.PasswordSignInAsync(user, requestBody.Password, false, false);
-            if (result.Succeeded)
-            {
-                return user;
-            }
+            return null;
         }
-
+        
+        var result = await _signInManager.CheckPasswordSignInAsync(user, requestBody.Password, false);
+        if (!result.Succeeded)
+        {
+            return null;
+        }
+            
         return user;
     }
+
+    public async Task<User?> GetUser(string email)
+    {
+        var response = await _userManager.FindByEmailAsync(email);
+        if (response == null)
+        {
+            return null;
+        }
+        return response;
+    }
+    
+    
 }
