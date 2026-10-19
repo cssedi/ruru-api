@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Local clone of vercel-labs/agent-skills (has its own git repo)
+frontend/agent-skills/
+
+# Local backups of the old separate .git folders
+_git-backup-*/
